@@ -25,10 +25,8 @@ import UIKit
 
 class DropdownPresentationController: UIPresentationController {
   private let backgroundView = UIView()
-  let albumCount: Int
   
-  init(presentedViewController: UIViewController, presenting presentingViewController: UIViewController?, albumCount: Int) {
-    self.albumCount = albumCount
+  override init(presentedViewController: UIViewController, presenting presentingViewController: UIViewController?) {
     super.init(presentedViewController: presentedViewController, presenting: presentingViewController)
     
     backgroundView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
@@ -52,9 +50,6 @@ class DropdownPresentationController: UIPresentationController {
   }
   
   override func size(forChildContentContainer container: UIContentContainer, withParentContainerSize parentSize: CGSize) -> CGSize {
-    if albumCount < 5 {
-      return CGSize(width: parentSize.width, height: 100 * CGFloat(albumCount))
-    }
     return CGSize(width: parentSize.width, height: parentSize.height * 0.5)
   }
   
