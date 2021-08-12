@@ -35,6 +35,7 @@ extension ImagePickerController {
   }
   
   @objc func closeButtonPressed(_ sender: UIBarButtonItem) {
+    self.imagePicker(self, didCancelWithAssets: [])
     if settings.dismiss.enabled {
       dismiss(animated: true)
     }
