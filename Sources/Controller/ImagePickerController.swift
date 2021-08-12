@@ -107,6 +107,7 @@ import Photos
     
     // Setup buttons
     let firstViewController = viewControllers.first
+    albumButton.tintColor = .white
     albumButton.setTitleColor(albumButton.tintColor, for: .normal)
     albumButton.titleLabel?.font = .systemFont(ofSize: 16)
     albumButton.titleLabel?.adjustsFontSizeToFitWidth = true
