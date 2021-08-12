@@ -68,9 +68,6 @@ import Photos
       // We can't use estimatedAssetCount on the collection
       // It returns NSNotFound. So actually fetch the assets...
       let assetsFetchResult = PHAsset.fetchAssets(in: $0, options: fetchOptions)
-      if assetsFetchResult.count == 0 {
-        self.isAlbumExist = false
-      }
       return assetsFetchResult.count > 0
     }
   }()
@@ -134,9 +131,8 @@ import Photos
     
     if let firstAlbum = albums.first {
       select(album: firstAlbum)
-    }
-    
-    if albums.count == 0 {
+    } else {
+      self.isAlbumExist = false
       self.isImageExist = self.assetsViewController.isImageExist
     }
   }
