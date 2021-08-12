@@ -23,64 +23,88 @@
 import UIKit
 
 extension UIColor {
-       
-    static var systemBackgroundColor: UIColor {
-        if #available(iOS 13.0, *) {
-            return systemBackground
-        } else {
-            // Same old color used for iOS 12 and earlier
-            return .white
-        }
+  
+  static var systemBackgroundColor: UIColor {
+    if #available(iOS 13.0, *) {
+      return systemBackground
+    } else {
+      // Same old color used for iOS 12 and earlier
+      return .white
     }
+  }
+  
+  static var systemShadowColor: UIColor {
+    if #available(iOS 13.0, *) {
+      return tertiarySystemBackground
+    } else {
+      // Same old color used for iOS 12 and earlier
+      return .black
+    }
+  }
+  
+  static var systemPrimaryTextColor: UIColor {
+    if #available(iOS 13.0, *) {
+      return label
+    } else {
+      // Same old color used for iOS 12 and earlier
+      return .black
+    }
+  }
+  
+  static var systemSecondaryTextColor: UIColor {
+    if #available(iOS 13.0, *) {
+      return secondaryLabel
+    } else {
+      // Same old color used for iOS 12 and earlier
+      return .black
+    }
+  }
+  
+  static var systemStrokeColor: UIColor {
+    if #available(iOS 13.0, *) {
+      return UIColor { (traitCollection: UITraitCollection) -> UIColor in
+        if traitCollection.userInterfaceStyle == .dark {
+          return white
+        }
+        else {
+          return black
+        }}
+    } else {
+      // Same old color used for iOS 12 and earlier
+      return .black
+    }
+  }
+  
+  static var systemOverlayColor: UIColor {
+    if #available(iOS 13.0, *) {
+      return secondarySystemBackground
+    } else {
+      // Same old color used for iOS 12 and earlier
+      return .lightGray
+    }
+  }
+  
+  public convenience init?(hex: String) {
+    let red, green, blue: CGFloat
     
-    static var systemShadowColor: UIColor {
-       if #available(iOS 13.0, *) {
-            return tertiarySystemBackground
-        } else {
-            // Same old color used for iOS 12 and earlier
-            return .black
+    if hex.hasPrefix("#") {
+      let start = hex.index(hex.startIndex, offsetBy: 1)
+      let hexColor = String(hex[start...])
+      
+      if hexColor.count == 6 {
+        let scanner = Scanner(string: hexColor)
+        var hexNumber: UInt64 = 0
+        
+        if scanner.scanHexInt64(&hexNumber) {
+          red = CGFloat((hexNumber & 0xff0000) >> 16) / 255
+          green = CGFloat((hexNumber & 0x00ff00) >> 8) / 255
+          blue = CGFloat((hexNumber & 0x0000ff) >> 0) / 255
+          
+          self.init(red: red, green: green, blue: blue, alpha: 1.0)
+          return
         }
+      }
     }
-    
-    static var systemPrimaryTextColor: UIColor {
-       if #available(iOS 13.0, *) {
-            return label
-        } else {
-            // Same old color used for iOS 12 and earlier
-            return .black
-        }
-    }
-    
-    static var systemSecondaryTextColor: UIColor {
-       if #available(iOS 13.0, *) {
-            return secondaryLabel
-        } else {
-            // Same old color used for iOS 12 and earlier
-            return .black
-        }
-    }
-    
-    static var systemStrokeColor: UIColor {
-        if #available(iOS 13.0, *) {
-            return UIColor { (traitCollection: UITraitCollection) -> UIColor in
-            if traitCollection.userInterfaceStyle == .dark {
-                return white
-            }
-            else {
-                return black
-            }}
-        } else {
-            // Same old color used for iOS 12 and earlier
-            return .black
-        }
-    }
-    
-    static var systemOverlayColor: UIColor {
-        if #available(iOS 13.0, *) {
-            return secondarySystemBackground
-        } else {
-            // Same old color used for iOS 12 and earlier
-            return .lightGray
-        }
-    }
+    return nil
+  }
 }
