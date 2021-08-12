@@ -30,7 +30,7 @@ import Photos
     // Move all theme related stuff to UIAppearance
     public class Theme : NSObject {
         /// Main background color
-        public lazy var backgroundColor: UIColor = .systemBackgroundColor
+        public lazy var backgroundColor: UIColor = UIColor(hex: "#1C1C1E")!
         
         /// Color for backgroun of drop downs
         public lazy var dropDownBackgroundColor: UIColor = .clear
@@ -64,7 +64,7 @@ import Photos
         
         public lazy var albumTitleAttributes: [NSAttributedString.Key: Any] = [
             NSAttributedString.Key.font: UIFont.systemFont(ofSize: 18),
-            NSAttributedString.Key.foregroundColor: UIColor.systemPrimaryTextColor
+            NSAttributedString.Key.foregroundColor: UIColor.white
         ]
     }
     
@@ -123,7 +123,11 @@ import Photos
             ///                PHAssetCollection.fetchAssetCollections(with: .smartAlbum, subtype: .smartAlbumPanoramas, options: options),
             ///                PHAssetCollection.fetchAssetCollections(with: .smartAlbum, subtype: .smartAlbumVideos, options: options),
             public lazy var fetchResults: [PHFetchResult<PHAssetCollection>] = [
-                PHAssetCollection.fetchAssetCollections(with: .smartAlbum, subtype: .smartAlbumUserLibrary, options: options),
+              PHAssetCollection.fetchAssetCollections(with: .smartAlbum, subtype: .smartAlbumUserLibrary, options: options),
+              PHAssetCollection.fetchAssetCollections(with: .smartAlbum, subtype: .smartAlbumFavorites, options: options),
+              PHAssetCollection.fetchAssetCollections(with: .album, subtype: .albumRegular, options: options),
+              PHAssetCollection.fetchAssetCollections(with: .smartAlbum, subtype: .smartAlbumSelfPortraits, options: options),
+              PHAssetCollection.fetchAssetCollections(with: .smartAlbum, subtype: .smartAlbumPanoramas, options: options),
             ]
         }
 

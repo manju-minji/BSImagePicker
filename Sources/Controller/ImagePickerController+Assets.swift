@@ -31,7 +31,6 @@ extension ImagePickerController: AssetsViewControllerDelegate {
                 imagePickerDelegate?.imagePicker(self, didDeselectAsset: first)
             }
         }
-        updatedDoneButton()
         imagePickerDelegate?.imagePicker(self, didSelectAsset: asset)
 
         if assetStore.count >= settings.selection.max {
@@ -40,7 +39,6 @@ extension ImagePickerController: AssetsViewControllerDelegate {
     }
 
     func assetsViewController(_ assetsViewController: AssetsViewController, didDeselectAsset asset: PHAsset) {
-        updatedDoneButton()
         imagePickerDelegate?.imagePicker(self, didDeselectAsset: asset)
     }
 

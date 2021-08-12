@@ -24,60 +24,67 @@ import Foundation
 import UIKit
 
 class DropdownPresentationController: UIPresentationController {
-    private let dropDownHeight: CGFloat = 200
-    private let backgroundView = UIView()
+  private let backgroundView = UIView()
+  
+  override init(presentedViewController: UIViewController, presenting presentingViewController: UIViewController?) {
+    super.init(presentedViewController: presentedViewController, presenting: presentingViewController)
     
-    override init(presentedViewController: UIViewController, presenting presentingViewController: UIViewController?) {
-        super.init(presentedViewController: presentedViewController, presenting: presentingViewController)
+    backgroundView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+    backgroundView.backgroundColor = .clear
+    backgroundView.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(backgroundTapped(_:))))
+  }
+  
+  @objc func backgroundTapped(_ recognizer: UIGestureRecognizer) {
+    presentingViewController.dismiss(animated: true)
+  }
+  
+  override func presentationTransitionWillBegin() {
+    guard let containerView = containerView else { return }
+    
+    containerView.insertSubview(backgroundView, at: 0)
+    backgroundView.frame = containerView.bounds
+  }
+  
+  override func containerViewWillLayoutSubviews() {
+    presentedView?.frame = frameOfPresentedViewInContainerView
+  }
+  
+  override func size(forChildContentContainer container: UIContentContainer, withParentContainerSize parentSize: CGSize) -> CGSize {
+    return CGSize(width: parentSize.width, height: parentSize.height * 0.6)
+  }
+  
+  override var frameOfPresentedViewInContainerView: CGRect {
+    guard let containerView = containerView,
+          let presentingView = presentingViewController.view else { return .zero }
+    
+    let size = self.size(forChildContentContainer: presentedViewController,
+                         withParentContainerSize: presentingView.bounds.size)
+    
+    var position: CGPoint
+    if let navigationBar = (presentingViewController as? UINavigationController)?.navigationBar {
+      // We can't use the frame directly since iOS 13 new modal presentation style
+      let navigationRect = navigationBar.convert(navigationBar.bounds, to: nil)
+      let presentingRect = presentingView.convert(presentingView.frame, to: containerView)
+      
+      position = CGPoint(x: presentingRect.origin.x, y: navigationRect.maxY)
+      
+      if #available(iOS 11.0, *) {
+        let bottom = UIApplication.shared.windows.filter { $0.isKeyWindow }.first?.safeAreaInsets.bottom ?? 0
         
-        backgroundView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
-        backgroundView.backgroundColor = .clear
-        backgroundView.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(backgroundTapped(_:))))
-    }
-    
-    @objc func backgroundTapped(_ recognizer: UIGestureRecognizer) {
-        presentingViewController.dismiss(animated: true)
-    }
-    
-    override func presentationTransitionWillBegin() {
-        guard let containerView = containerView else { return }
-        
-        containerView.insertSubview(backgroundView, at: 0)
-        backgroundView.frame = containerView.bounds
-    }
-    
-    override func containerViewWillLayoutSubviews() {
-        presentedView?.frame = frameOfPresentedViewInContainerView
-    }
-    
-    override func size(forChildContentContainer container: UIContentContainer, withParentContainerSize parentSize: CGSize) -> CGSize {
-        return CGSize(width: parentSize.width, height: dropDownHeight)
-    }
-    
-    override var frameOfPresentedViewInContainerView: CGRect {
-        guard let containerView = containerView,
-            let presentingView = presentingViewController.view else { return .zero }
-
-        let size = self.size(forChildContentContainer: presentedViewController,
-                          withParentContainerSize: presentingView.bounds.size)
-
-        let position: CGPoint
-        if let navigationBar = (presentingViewController as? UINavigationController)?.navigationBar {
-            // We can't use the frame directly since iOS 13 new modal presentation style
-            let navigationRect = navigationBar.convert(navigationBar.bounds, to: nil)
-            let presentingRect = presentingView.convert(presentingView.frame, to: containerView)
-            position = CGPoint(x: presentingRect.origin.x, y: navigationRect.maxY)
-
-            // Match color with navigation bar
-            presentedViewController.view.backgroundColor = navigationBar.barTintColor
-        } else {
-            if #available(iOS 11.0, *) {
-                position = CGPoint(x: containerView.safeAreaInsets.left, y: containerView.safeAreaInsets.top)
-            } else {
-                position = .zero
-            }
+        if bottom > 0 {
+          position = CGPoint(x: presentingRect.origin.x, y: 85)
         }
-
-        return CGRect(origin: position, size: size)
+      }
+      // Match color with navigation bar
+      presentedViewController.view.backgroundColor = navigationBar.barTintColor
+    } else {
+      if #available(iOS 11.0, *) {
+        position = CGPoint(x: containerView.safeAreaInsets.left, y: containerView.safeAreaInsets.top)
+      } else {
+        position = .zero
+      }
     }
+    
+    return CGRect(origin: position, size: size)
+  }
 }

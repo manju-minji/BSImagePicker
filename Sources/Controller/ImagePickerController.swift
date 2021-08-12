@@ -26,135 +26,127 @@ import Photos
 // MARK: ImagePickerController
 @objc(BSImagePickerController)
 @objcMembers open class ImagePickerController: UINavigationController {
-    // MARK: Public properties
-    public weak var imagePickerDelegate: ImagePickerControllerDelegate?
-    public var settings: Settings = Settings()
-    public var doneButton: UIBarButtonItem = UIBarButtonItem(title: "", style: .done, target: nil, action: nil)
-    public var cancelButton: UIBarButtonItem = UIBarButtonItem(barButtonSystemItem: .cancel, target: nil, action: nil)
-    public var albumButton: UIButton = UIButton(type: .custom)
-    public var selectedAssets: [PHAsset] {
-        get {
-            return assetStore.assets
-        }
+  // MARK: Public properties
+  public weak var imagePickerDelegate: ImagePickerControllerDelegate?
+  public var settings: Settings = Settings()
+  public var cancelButton: UIBarButtonItem = UIBarButtonItem(barButtonSystemItem: .cancel, target: nil, action: nil)
+  public var albumButton: UIButton = UIButton(type: .custom)
+  public var selectedAssets: [PHAsset] {
+    get {
+      return assetStore.assets
     }
-
-    /// Title to use for button
-    public var doneButtonTitle = Bundle(for: UIBarButtonItem.self).localizedString(forKey: "Done", value: "Done", table: "")
-
-    // MARK: Internal properties
-    var assetStore: AssetStore
-    var onSelection: ((_ asset: PHAsset) -> Void)?
-    var onDeselection: ((_ asset: PHAsset) -> Void)?
-    var onCancel: ((_ assets: [PHAsset]) -> Void)?
-    var onFinish: ((_ assets: [PHAsset]) -> Void)?
+  }
+  public var isAlbumExist: Bool = true
+  public var isImageExist: Bool = true
+  
+  
+  // MARK: Internal properties
+  var assetStore: AssetStore
+  var onSelection: ((_ asset: PHAsset) -> Void)?
+  var onDeselection: ((_ asset: PHAsset) -> Void)?
+  var onCancel: ((_ assets: [PHAsset]) -> Void)?
+  var onFinish: ((_ assets: [PHAsset]) -> Void)?
+  
+  let assetsViewController: AssetsViewController
+  let albumsViewController = AlbumsViewController()
+  let dropdownTransitionDelegate = DropdownTransitionDelegate()
+  let zoomTransitionDelegate = ZoomTransitionDelegate()
+  
+  lazy var albums: [PHAssetCollection] = {
+    // We don't want collections without assets.
+    // I would like to do that with PHFetchOptions: fetchOptions.predicate = NSPredicate(format: "estimatedAssetCount > 0")
+    // But that doesn't work...
+    // This seems suuuuuper ineffective...
+    let fetchOptions = settings.fetch.assets.options.copy() as! PHFetchOptions
+    fetchOptions.fetchLimit = 1
     
-    let assetsViewController: AssetsViewController
-    let albumsViewController = AlbumsViewController()
-    let dropdownTransitionDelegate = DropdownTransitionDelegate()
-    let zoomTransitionDelegate = ZoomTransitionDelegate()
-
-    lazy var albums: [PHAssetCollection] = {
-        // We don't want collections without assets.
-        // I would like to do that with PHFetchOptions: fetchOptions.predicate = NSPredicate(format: "estimatedAssetCount > 0")
-        // But that doesn't work...
-        // This seems suuuuuper ineffective...
-        let fetchOptions = settings.fetch.assets.options.copy() as! PHFetchOptions
-        fetchOptions.fetchLimit = 1
-
-        return settings.fetch.album.fetchResults.filter {
-            $0.count > 0
-        }.flatMap {
-            $0.objects(at: IndexSet(integersIn: 0..<$0.count))
-        }.filter {
-            // We can't use estimatedAssetCount on the collection
-            // It returns NSNotFound. So actually fetch the assets...
-            let assetsFetchResult = PHAsset.fetchAssets(in: $0, options: fetchOptions)
-            return assetsFetchResult.count > 0
-        }
-    }()
-
-    public init(selectedAssets: [PHAsset] = []) {
-        assetStore = AssetStore(assets: selectedAssets)
-        assetsViewController = AssetsViewController(store: assetStore)
-        super.init(nibName: nil, bundle: nil)
+    return settings.fetch.album.fetchResults.filter {
+      $0.count > 0
+    }.flatMap {
+      $0.objects(at: IndexSet(integersIn: 0..<$0.count))
+    }.filter {
+      // We can't use estimatedAssetCount on the collection
+      // It returns NSNotFound. So actually fetch the assets...
+      let assetsFetchResult = PHAsset.fetchAssets(in: $0, options: fetchOptions)
+      if assetsFetchResult.count == 0 {
+        self.isAlbumExist = false
+      }
+      return assetsFetchResult.count > 0
     }
-
-    public required init?(coder aDecoder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
-    }
-
-    public override func viewDidLoad() {
-        super.viewDidLoad()
-        
-        // Sync settings
-        albumsViewController.settings = settings
-        assetsViewController.settings = settings
-        
-        // Setup view controllers
-        albumsViewController.delegate = self
-        assetsViewController.delegate = self
-        
-        viewControllers = [assetsViewController]
-        view.backgroundColor = settings.theme.backgroundColor
-
-        // Setup delegates
-        delegate = zoomTransitionDelegate
-        presentationController?.delegate = self
-
-        // Turn off translucency so drop down can match its color
-        navigationBar.isTranslucent = false
-        navigationBar.isOpaque = true
-        
-        // Setup buttons
-        let firstViewController = viewControllers.first
-        albumButton.setTitleColor(albumButton.tintColor, for: .normal)
-        albumButton.titleLabel?.font = .systemFont(ofSize: 16)
-        albumButton.titleLabel?.adjustsFontSizeToFitWidth = true
-
-        let arrowView = ArrowView(frame: CGRect(x: 0, y: 0, width: 8, height: 8))
-        arrowView.backgroundColor = .clear
-        arrowView.strokeColor = albumButton.tintColor
-        let image = arrowView.asImage
-
-        albumButton.setImage(image, for: .normal)
-        albumButton.semanticContentAttribute = .forceRightToLeft // To set image to the right without having to calculate insets/constraints.
-        albumButton.addTarget(self, action: #selector(ImagePickerController.albumsButtonPressed(_:)), for: .touchUpInside)
-        firstViewController?.navigationItem.titleView = albumButton
-
-        doneButton.target = self
-        doneButton.action = #selector(doneButtonPressed(_:))
-        firstViewController?.navigationItem.rightBarButtonItem = doneButton
-
-        cancelButton.target = self
-        cancelButton.action = #selector(cancelButtonPressed(_:))
-        firstViewController?.navigationItem.leftBarButtonItem = cancelButton
-        
-        updatedDoneButton()
-        updateAlbumButton()
-
-        // We need to have some color to be able to match with the drop down
-        if navigationBar.barTintColor == nil {
-            navigationBar.barTintColor = .systemBackgroundColor
-        }
-
-        if let firstAlbum = albums.first {
-            select(album: firstAlbum)
-        }
-    }
-
-    public func deselect(asset: PHAsset) {
-        assetsViewController.unselect(asset: asset)
-        assetStore.remove(asset)
-        updatedDoneButton()
+  }()
+  
+  public init(selectedAssets: [PHAsset] = []) {
+    assetStore = AssetStore(assets: selectedAssets)
+    assetsViewController = AssetsViewController(store: assetStore)
+    super.init(nibName: nil, bundle: nil)
+  }
+  
+  public required init?(coder aDecoder: NSCoder) {
+    fatalError("init(coder:) has not been implemented")
+  }
+  
+  public override func viewDidLoad() {
+    super.viewDidLoad()
+    
+    // Sync settings
+    albumsViewController.settings = settings
+    assetsViewController.settings = settings
+    
+    // Setup view controllers
+    albumsViewController.delegate = self
+    assetsViewController.delegate = self
+    
+    viewControllers = [assetsViewController]
+    view.backgroundColor = settings.theme.backgroundColor
+    
+    // Setup delegates
+    delegate = zoomTransitionDelegate
+    presentationController?.delegate = self
+    
+    // Turn off translucency so drop down can match its color
+    navigationBar.isTranslucent = false
+    navigationBar.isOpaque = true
+    
+    // Setup buttons
+    let firstViewController = viewControllers.first
+    albumButton.tintColor = .white
+    albumButton.setTitleColor(albumButton.tintColor, for: .normal)
+    albumButton.titleLabel?.font = .systemFont(ofSize: 16)
+    albumButton.titleLabel?.adjustsFontSizeToFitWidth = true
+    
+    let arrowView = ArrowView(frame: CGRect(x: 0, y: 0, width: 8, height: 8))
+    arrowView.backgroundColor = .clear
+    arrowView.strokeColor = albumButton.tintColor
+    let image = arrowView.asImage
+    
+    albumButton.setImage(image, for: .normal)
+    albumButton.semanticContentAttribute = .forceRightToLeft // To set image to the right without having to calculate insets/constraints.
+    albumButton.addTarget(self, action: #selector(ImagePickerController.albumsButtonPressed(_:)), for: .touchUpInside)
+    firstViewController?.navigationItem.titleView = albumButton
+    
+    cancelButton.target = self
+    cancelButton.action = #selector(cancelButtonPressed(_:))
+    firstViewController?.navigationItem.leftBarButtonItem = cancelButton
+    
+    updateAlbumButton()
+    
+    self.navigationBar.barTintColor = UIColor(hex: "#1C1C1E")!
+    
+    if let firstAlbum = albums.first {
+      select(album: firstAlbum)
     }
     
-    func updatedDoneButton() {
-        doneButton.title = assetStore.count > 0 ? doneButtonTitle + " (\(assetStore.count))" : doneButtonTitle
-      
-        doneButton.isEnabled = assetStore.count >= settings.selection.min
+    if albums.count == 0 {
+      self.isImageExist = self.assetsViewController.isImageExist
     }
-
-    func updateAlbumButton() {
-        albumButton.isHidden = albums.count < 2
-    }
+  }
+  
+  public func deselect(asset: PHAsset) {
+    assetsViewController.unselect(asset: asset)
+    assetStore.remove(asset)
+  }
+  
+  func updateAlbumButton() {
+    albumButton.isHidden = albums.count < 2
+  }
 }
