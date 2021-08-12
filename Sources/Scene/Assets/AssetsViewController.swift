@@ -121,13 +121,6 @@ class AssetsViewController: UIViewController {
     }
   }
   
-  public func clearSelections() {
-    // Unselect all
-    for indexPath in collectionView.indexPathsForSelectedItems ?? [] {
-      collectionView.deselectItem(at: indexPath, animated: false)
-    }
-  }
-  
   func unselect(asset: PHAsset) {
     let index = fetchResult.index(of: asset)
     guard index != NSNotFound else { return }

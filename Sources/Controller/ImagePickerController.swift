@@ -142,6 +142,7 @@ import Photos
   }
   
   public func clearSelectionStatus() {
-    self.assetsViewController.clearSelections()
+    guard let asset = assetStore.assets.first else { return }
+    self.deselect(asset: asset)
   }
 }
