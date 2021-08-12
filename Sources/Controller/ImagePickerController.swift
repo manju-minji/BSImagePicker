@@ -49,6 +49,7 @@ import Photos
   
   let assetsViewController: AssetsViewController
   let albumsViewController = AlbumsViewController()
+  lazy var dropdownTransitionDelegate = DropdownTransitionDelegate(albumCount: self.albums.count)
   let zoomTransitionDelegate = ZoomTransitionDelegate()
   
   lazy var albums: [PHAssetCollection] = {
