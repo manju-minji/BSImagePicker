@@ -34,7 +34,7 @@ extension ImagePickerController {
         present(albumsViewController, animated: true)
     }
 
-    @objc public func cancelButtonPressed(_ sender: UIBarButtonItem) {
+    @objc public func closeButtonPressed(_ sender: UIBarButtonItem) {
         imagePickerDelegate?.imagePicker(self, didCancelWithAssets: assetStore.assets)
         
         if settings.dismiss.enabled {

@@ -54,8 +54,6 @@ class ViewController: UIViewController {
         imagePicker.settings.selection.unselectOnReachingMax = true
         imagePicker.settings.fetch.assets.supportedMediaTypes = [.image, .video]
         imagePicker.albumButton.tintColor = UIColor.green
-        imagePicker.cancelButton.tintColor = UIColor.red
-        imagePicker.doneButton.tintColor = UIColor.purple
         imagePicker.navigationBar.barTintColor = .black
         imagePicker.settings.theme.backgroundColor = .black
         imagePicker.settings.theme.selectionFillColor = UIColor.gray

@@ -29,7 +29,6 @@ import Photos
   // MARK: Public properties
   public weak var imagePickerDelegate: ImagePickerControllerDelegate?
   public var settings: Settings = Settings()
-  public var cancelButton: UIBarButtonItem = UIBarButtonItem(barButtonSystemItem: .cancel, target: nil, action: nil)
   public var albumButton: UIButton = UIButton(type: .custom)
   public var selectedAssets: [PHAsset] {
     get {
@@ -120,10 +119,6 @@ import Photos
     albumButton.semanticContentAttribute = .forceRightToLeft // To set image to the right without having to calculate insets/constraints.
     albumButton.addTarget(self, action: #selector(ImagePickerController.albumsButtonPressed(_:)), for: .touchUpInside)
     firstViewController?.navigationItem.titleView = albumButton
-    
-    cancelButton.target = self
-    cancelButton.action = #selector(cancelButtonPressed(_:))
-    firstViewController?.navigationItem.leftBarButtonItem = cancelButton
     
     updateAlbumButton()
     
