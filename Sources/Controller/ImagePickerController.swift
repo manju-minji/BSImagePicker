@@ -140,4 +140,8 @@ import Photos
   func updateAlbumButton() {
     albumButton.isHidden = albums.count < 2
   }
+  
+  public func clearSelectionStatus() {
+    self.assetsViewController.clearSelections()
+  }
 }
