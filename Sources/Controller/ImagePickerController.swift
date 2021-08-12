@@ -29,7 +29,6 @@ import Photos
   // MARK: Public properties
   public weak var imagePickerDelegate: ImagePickerControllerDelegate?
   public var settings: Settings = Settings()
-  public var cancelButton: UIBarButtonItem = UIBarButtonItem(barButtonSystemItem: .cancel, target: nil, action: nil)
   public var albumButton: UIButton = UIButton(type: .custom)
   public var selectedAssets: [PHAsset] {
     get {
@@ -122,9 +121,12 @@ import Photos
     albumButton.addTarget(self, action: #selector(ImagePickerController.albumsButtonPressed(_:)), for: .touchUpInside)
     firstViewController?.navigationItem.titleView = albumButton
     
-    cancelButton.target = self
-    cancelButton.action = #selector(cancelButtonPressed(_:))
-    firstViewController?.navigationItem.leftBarButtonItem = cancelButton
+    let backimage = UIImageView()
+    backimage.image = UIImage(named: "Close")
+    backimage.frame = CGRect(x: 0, y: 0, width: 44, height: 44)
+    let gesture = UITapGestureRecognizer(target: self, action: #selector(closeButtonPressed(_:)))
+    backimage.addGestureRecognizer(gesture)
+    firstViewController?.navigationItem.leftBarButtonItem = UIBarButtonItem(customView: backimage)
     
     updateAlbumButton()
     

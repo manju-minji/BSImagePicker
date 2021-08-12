@@ -23,29 +23,27 @@
 import UIKit
 
 extension ImagePickerController {
-    @objc func albumsButtonPressed(_ sender: UIButton) {
-        albumsViewController.albums = albums
-        
-        // Setup presentation controller
-      albumsViewController.transitioningDelegate = dropdownTransitionDelegate
-      albumsViewController.modalPresentationStyle = .custom
-      rotateButtonArrow()
-        
-        present(albumsViewController, animated: true)
-    }
-
-    @objc func cancelButtonPressed(_ sender: UIBarButtonItem) {
-        imagePickerDelegate?.imagePicker(self, didCancelWithAssets: assetStore.assets)
-        
-        if settings.dismiss.enabled {
-            dismiss(animated: true)
-        }
-    }
+  @objc func albumsButtonPressed(_ sender: UIButton) {
+    albumsViewController.albums = albums
     
-    func rotateButtonArrow() {
-        UIView.animate(withDuration: 0.3) { [weak self] in
-            guard let imageView = self?.albumButton.imageView else { return }
-            imageView.transform = imageView.transform.rotated(by: .pi)
-        }
+    // Setup presentation controller
+    albumsViewController.transitioningDelegate = dropdownTransitionDelegate
+    albumsViewController.modalPresentationStyle = .custom
+    rotateButtonArrow()
+    
+    present(albumsViewController, animated: true)
+  }
+  
+  @objc func closeButtonPressed(_ sender: UIBarButtonItem) {
+    if settings.dismiss.enabled {
+      dismiss(animated: true)
     }
+  }
+  
+  func rotateButtonArrow() {
+    UIView.animate(withDuration: 0.3) { [weak self] in
+      guard let imageView = self?.albumButton.imageView else { return }
+      imageView.transform = imageView.transform.rotated(by: .pi)
+    }
+  }
 }
