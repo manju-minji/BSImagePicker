@@ -24,8 +24,15 @@ import Foundation
 import UIKit
 
 class DropdownTransitionDelegate: NSObject, UIViewControllerTransitioningDelegate {
+  
+  let albumCount: Int
+  
+  init(albumCount: Int) {
+    self.albumCount = albumCount
+  }
+  
     func presentationController(forPresented presented: UIViewController, presenting: UIViewController?, source: UIViewController) -> UIPresentationController? {
-        return DropdownPresentationController(presentedViewController: presented, presenting: presenting)
+      return DropdownPresentationController(presentedViewController: presented, presenting: presenting, albumCount: albumCount)
     }
     
     func animationController(forPresented presented: UIViewController, presenting: UIViewController, source: UIViewController) -> UIViewControllerAnimatedTransitioning? {

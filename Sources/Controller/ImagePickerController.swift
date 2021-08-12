@@ -49,7 +49,6 @@ import Photos
   
   let assetsViewController: AssetsViewController
   let albumsViewController = AlbumsViewController()
-  let dropdownTransitionDelegate = DropdownTransitionDelegate()
   let zoomTransitionDelegate = ZoomTransitionDelegate()
   
   lazy var albums: [PHAssetCollection] = {
@@ -79,6 +78,8 @@ import Photos
     assetStore = AssetStore(assets: selectedAssets)
     assetsViewController = AssetsViewController(store: assetStore)
     super.init(nibName: nil, bundle: nil)
+    
+    self.navigationBar.shadowImage = UIColor(hex: "#2C2C2E")!.image(CGSize(width: self.view.frame.width, height: 1))
   }
   
   public required init?(coder aDecoder: NSCoder) {
