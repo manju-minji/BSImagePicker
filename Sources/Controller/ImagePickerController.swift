@@ -35,9 +35,6 @@ import Photos
       return assetStore.assets
     }
   }
-  public var isAlbumExist: Bool = true
-  public var isImageExist: Bool = true
-  
   
   // MARK: Internal properties
   var assetStore: AssetStore
@@ -126,9 +123,6 @@ import Photos
     
     if let firstAlbum = albums.first {
       select(album: firstAlbum)
-    } else {
-      self.isAlbumExist = false
-      self.isImageExist = self.assetsViewController.isImageExist
     }
   }
   
@@ -144,5 +138,9 @@ import Photos
   public func clearSelectionStatus() {
     guard let asset = assetStore.assets.first else { return }
     self.deselect(asset: asset)
+  }
+  
+  public func checkImageEmtpy() -> Bool {
+    return assetsViewController.isImageEmpty()
   }
 }

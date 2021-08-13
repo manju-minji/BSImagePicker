@@ -32,8 +32,6 @@ protocol AssetsViewControllerDelegate: class {
 class AssetsViewController: UIViewController {
   weak var delegate: AssetsViewControllerDelegate?
   
-  public var isImageExist: Bool = true
-    
     var settings: Settings! {
       didSet { dataSource.settings = settings }
     }
@@ -53,7 +51,6 @@ class AssetsViewController: UIViewController {
     self.store = store
     dataSource = AssetsCollectionViewDataSource(fetchResult: fetchResult, store: store)
     super.init(nibName: nil, bundle: nil)
-    self.isImageExist == (self.fetchResult.count == 0) ? false : true
   }
   
   required init?(coder: NSCoder) {
@@ -130,6 +127,10 @@ class AssetsViewController: UIViewController {
     for indexPath in collectionView.indexPathsForSelectedItems ?? [] {
       updateSelectionIndexForCell(at: indexPath)
     }
+  }
+  
+  func isImageEmpty() -> Bool {
+    return fetchResult.count == 0
   }
   
   override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
